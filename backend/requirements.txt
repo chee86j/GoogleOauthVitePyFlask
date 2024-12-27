@@ -6,3 +6,4 @@ requests
 google-auth
 Flask-Cors
 axios
+Flask-Migrate

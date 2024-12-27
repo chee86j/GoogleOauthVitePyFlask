@@ -48,4 +48,4 @@ venv/
 *.log
 *.tmp
 
-/migrations/
+backend/migrations/
