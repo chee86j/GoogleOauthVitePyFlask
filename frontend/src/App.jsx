@@ -17,14 +17,12 @@ function App() {
         );
         if (response.status === 200) {
           const userData = response.data;
-          if (typeof userData === 'string') {
-            setUser(JSON.parse(userData));
-          } else {
-            setUser(userData);
-          }
+          setUser(typeof userData === 'string' ? JSON.parse(userData) : userData);
         }
       } catch (error) {
-        console.error('Not authenticated:', error);
+        if (error.response?.status !== 401) {
+          console.error('Authentication error:', error);
+        }
         setUser(null);
       } finally {
         setLoading(false);

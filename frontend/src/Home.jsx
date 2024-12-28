@@ -21,6 +21,7 @@ const Home = ({ user, setUser }) => {
       navigate('/signin', { replace: true });
     } catch (error) {
       console.error('Logout failed:', error);
+      alert('Failed to log out. Please try again.');
     }
   };
 
