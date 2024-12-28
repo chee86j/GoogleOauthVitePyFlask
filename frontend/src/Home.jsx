@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Toast from './components/Toast';
 
 const Home = ({ user, setUser }) => {
   const navigate = useNavigate();
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
 
   const handleSignOut = async () => {
     try {
@@ -13,15 +17,13 @@ const Home = ({ user, setUser }) => {
         {},
         { withCredentials: true }
       );
-      
-      // Clear the user state in App.jsx
       setUser(null);
-      
-      // Force navigation to signin
       navigate('/signin', { replace: true });
     } catch (error) {
       console.error('Logout failed:', error);
-      alert('Failed to log out. Please try again.');
+      setToastMessage('Failed to log out. Please try again.');
+      setToastType('error');
+      setShowToast(true);
     }
   };
 
@@ -31,24 +33,50 @@ const Home = ({ user, setUser }) => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={handleSignOut}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md shadow-md transition-colors"
-        >
-          Sign Out
-        </button>
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <span className="text-xl font-semibold text-gray-800">
+                Welcome, {user.first_name}!
+              </span>
+            </div>
+            <div className="flex items-center">
+              <button
+                onClick={handleSignOut}
+                className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md shadow-md transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-xl p-6">
+          <h2 className="text-2xl font-bold mb-4">Your Profile</h2>
+          <div className="space-y-4">
+            <p className="text-gray-700">
+              <span className="font-semibold">Name:</span> {user.first_name} {user.last_name}
+            </p>
+            <p className="text-gray-700">
+              <span className="font-semibold">Email:</span> {user.email}
+            </p>
+          </div>
+        </div>
       </div>
-      
-      <header className="text-center mb-8">
-        <h2 className="text-2xl font-semibold mb-4">
-          Welcome {user.first_name} {user.last_name}!
-        </h2>
-        <p className="text-lg font-light">
-          You're signed in with {user.email}
-        </p>
-      </header>
+
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 };
