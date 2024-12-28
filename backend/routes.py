@@ -4,7 +4,6 @@ from flask_login import login_user, current_user
 from app import app, db
 from models import User
 import os
-import json
 
 @app.route('/google_login')
 def google_login():
@@ -60,9 +59,11 @@ def google_authorized():
 @app.route('/api/check-auth')
 def check_auth():
     if 'user' in session:
-        user_data = session['user']
-        # Ensure we're sending an object/dict, not a string
-        if isinstance(user_data, str):
-            user_data = json.loads(user_data)
-        return jsonify(user_data)
+        return jsonify(session['user'])
     return jsonify({'error': 'Not authenticated'}), 401
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    # Clear the session
+    session.clear()
+    return jsonify({'message': 'Successfully logged out'}), 200

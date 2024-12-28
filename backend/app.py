@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 from config import GoogleAuthConfig
+from datetime import timedelta
 
 # Load environment variables
 load_dotenv()
@@ -16,6 +17,14 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 app = Flask(__name__)
 app.secret_key = os.getenv('JWT_SECRET_KEY')
+
+# Configure session cookie
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='None',
+    PERMANENT_SESSION_LIFETIME=timedelta(minutes=60)
+)
 
 # Configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = (
@@ -39,7 +48,10 @@ google_bp = make_google_blueprint(
 )
 app.register_blueprint(google_bp, url_prefix="/login")
 
-CORS(app, resources={r"/*": {"origins": ["http://localhost:5173"]}})
+# Configure CORS with cookie support
+CORS(app, 
+     resources={r"/*": {"origins": ["http://localhost:5173"]}},
+     supports_credentials=True)
 
 # Import routes after extensions initialization
 from routes import *

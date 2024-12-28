@@ -17,7 +17,6 @@ function App() {
         );
         if (response.status === 200) {
           const userData = response.data;
-          console.log('User data received:', userData);
           if (typeof userData === 'string') {
             setUser(JSON.parse(userData));
           } else {
@@ -26,6 +25,7 @@ function App() {
         }
       } catch (error) {
         console.error('Not authenticated:', error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -52,9 +52,9 @@ function App() {
         path="/" 
         element={
           user ? (
-            <Home user={typeof user === 'string' ? JSON.parse(user) : user} />
+            <Home user={user} setUser={setUser} />
           ) : (
-            <Navigate to="/signin" />
+            <Navigate to="/signin" replace />
           )
         } 
       />

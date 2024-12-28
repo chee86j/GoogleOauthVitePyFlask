@@ -1,16 +1,16 @@
+
 # GoogleOauthVitePyFlask
 
-A full-stack web application integrating Google OAuth 2.0 for user authentication. 
-The project uses a **Vite-powered React frontend** and a **Flask backend**.
+A full-stack web application integrating Google OAuth 2.0 for user authentication. The project uses a **Vite-powered React frontend** and a **Flask backend**.
+
+---
 
 ## Features
 
-- **Google OAuth 2.0 Authentication**: Secure user login with Google.
-- **Frontend**: Built with React and Vite for fast and modular development.
-- **Backend**: Python Flask with SQLAlchemy for managing user data.
-- **RESTful API**: Provides endpoints for user authentication and data handling.
-- **CORS Enabled**: Ensures communication between the frontend and backend is secure.
-- **Environment Configuration**: Manages sensitive credentials using `.env` files.
+- Secure Google OAuth 2.0 authentication.
+- Protected routes and session management.
+- PostgreSQL database integration.
+- React frontend styled with Tailwind CSS.
 
 ---
 
@@ -62,57 +62,108 @@ The project uses a **Vite-powered React frontend** and a **Flask backend**.
 
 ---
 
+## Google OAuth 2.0 Setup
+
+To enable Google OAuth 2.0 in your application:
+
+1. **Create a Project in Google Cloud Console**:
+   - Visit [Google Cloud Console](https://console.cloud.google.com).
+   - Log in and create a new project or select an existing one.
+
+2. **Enable the Google Identity Services API**:
+   - Navigate to **APIs & Services > Library**.
+   - Search for and enable the **Google Identity Services API**.
+
+3. **Configure OAuth 2.0 Credentials**:
+   - Go to **APIs & Services > Credentials**.
+   - Click **Create Credentials** and select **OAuth 2.0 Client ID**.
+   - Choose **External** as the application type.
+   - Configure the following:
+     - **Authorized JavaScript Origins**:
+       ```
+       http://localhost:5173
+       http://127.0.0.1:5173
+       ```
+     - **Authorized Redirect URIs**:
+       ```
+       http://localhost:5000/login/google/authorized
+       http://127.0.0.1:5000/login/google/authorized
+       ```
+
+4. **Save Credentials**:
+   - Note the **Client ID** and **Client Secret**. Update your `.env` files as shown below.
+
+---
+
 ## Environment Variables
 
-Create a `.env` file in the root directory with the following keys:
-
+### Root `.env`:
 ```plaintext
-# Backend
-DB_USERNAME=your_db_username
-DB_PASSWORD=your_db_password
-DB_NAME=your_db_name
-JWT_SECRET_KEY=your_jwt_secret_key
-
-# Google OAuth
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
+DB_NAME=google_oauth_app_db
+JWT_SECRET_KEY=your_secret_key
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:5173/api/auth/callback
+GOOGLE_REDIRECT_URI=http://localhost:5000/login/google/authorized
+FRONTEND_URL=http://localhost:5173
+```
 
-# Frontend
+### Frontend `.env`:
+```plaintext
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
 ---
 
-## Setting Up Google OAuth 2.0
+## Tech Stack
 
-To enable Google OAuth 2.0 in your application, follow these steps:
+### Backend:
+- **Flask**: Backend framework for Python.
+- **Flask-Dance**: Simplifies OAuth integrations.
+- **Flask-SQLAlchemy**: ORM for managing database interactions.
+- **PostgreSQL**: Database for storing user and session data.
+- **Flask-Migrate**: Handles database migrations.
+- **Flask-Login**: Provides session management.
 
-1.  Create a Project in Google Cloud Console:
-        Visit Google Cloud Console at `https://console.cloud.google.com/welcome?inv=1&invt=AblGKA&project=prop-pilot-416817`.
-        Log in with your Google account.
-        Click on Select a Project at the top and create a new project (or select an existing one).
+### Frontend:
+- **React**: For building interactive user interfaces.
+- **React Router**: Enables client-side routing.
+- **Axios**: Handles API requests between the frontend and backend.
+- **Tailwind CSS**: Provides utility-first CSS for styling.
+- **Vite**: Development server and build tool for fast frontend development.
 
-2.  Enable the OAuth 2.0 API:
-        Navigate to APIs & Services > Library.
-        Search for and enable the "Google+ API" or "Identity Toolkit API" (depending on your specific needs).
+---
 
-3.  Create OAuth 2.0 Credentials:
-        Go to APIs & Services > Credentials.
-        Click Create Credentials and select OAuth 2.0 Client ID.
-        Select the `External` application type and click Create.
+## Common Issues
 
-        Configure the OAuth Consent Screen:
-            Enter your app's name and other required details.
-            Add a test user (your email or other authorized emails for testing).
+1. **InsecureTransportError**
+   - Expected in development when running on HTTP.
+   - Use HTTPS in production.
 
-        Configure the Web Application Settings:
+2. **Database Connection**
+   - Ensure PostgreSQL is running.
+   - Verify database credentials in `.env`.
+   - Confirm the database exists.
 
-            Choose Web Application as the application type.
-            Set the following:
-                Authorized JavaScript Origins:
-                    `http://localhost:5173`
-                Authorized Redirect URIs:
-                    `http://localhost:5173/api/auth/callback`
+3. **OAuth Errors**
+   - Check Google Cloud Console credentials.
+   - Verify redirect URIs.
+   - Ensure `.env` variables are correctly configured.
 
-    Save the credentials and note down your Client ID and Client Secret.
+---
+
+## Development Details
+
+- **Backend**: Runs on `http://localhost:5000`.
+- **Frontend**: Runs on `http://localhost:5173`.
+- **CORS**: Configured to allow requests from the frontend origin.
+- **Database Migrations**: Managed using Flask-Migrate.
+
+---
+
+## Security Notes
+
+- Use HTTPS in production for secure communication.
+- Never commit `.env` files to source control.
+- Keep Google Client ID and Client Secret private.
