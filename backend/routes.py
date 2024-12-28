@@ -1,21 +1,68 @@
-from flask import request, jsonify
-from app import app
-from google_oauth import verify_google_token
+from flask import redirect, url_for, session, jsonify
+from flask_dance.contrib.google import google
+from flask_login import login_user, current_user
+from app import app, db
+from models import User
+import os
+import json
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    token = request.json.get('token')
+@app.route('/google_login')
+def google_login():
+    if not google.authorized:
+        return redirect(url_for("google.login"))
+    return redirect(url_for("google_authorized"))
 
-    if not token:
-        return jsonify({'message': 'No token provided'}), 400
+@app.route('/google_authorized')
+def google_authorized():
+    if not google.authorized:
+        return redirect(url_for('google_login'))
+    
+    try:
+        # Fetch user information from Google
+        resp = google.get("/oauth2/v1/userinfo")
+        if not resp.ok:
+            return jsonify({'error': 'Failed to fetch user info from Google.'}), 400
 
-    user = verify_google_token(token)
+        user_info = resp.json()
+        email = user_info["email"]
+        first_name = user_info.get("given_name", "")
+        last_name = user_info.get("family_name", "")
+        google_id = user_info["id"]
 
-    if user:
-        return jsonify({
-            'id': user.id,
+        # Check if the user already exists
+        user = User.query.filter_by(google_id=google_id).first()
+
+        if not user:
+            # Create a new user if not found
+            user = User(
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                google_id=google_id
+            )
+            db.session.add(user)
+            db.session.commit()
+
+        # Log the user in
+        login_user(user)
+        session['user'] = {
+            'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name
-        }), 200
-    else:
-        return jsonify({'message': 'Invalid Credentials'}), 401
+        }
+        session.modified = True
+
+        return redirect(f"{os.getenv('FRONTEND_URL')}?login=success")
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/check-auth')
+def check_auth():
+    if 'user' in session:
+        user_data = session['user']
+        # Ensure we're sending an object/dict, not a string
+        if isinstance(user_data, str):
+            user_data = json.loads(user_data)
+        return jsonify(user_data)
+    return jsonify({'error': 'Not authenticated'}), 401

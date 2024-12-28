@@ -1,79 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 
-const googleButtonStyles = {
-    backgroundColor: '#4285F4', // Google blue
-    color: 'white',
-    padding: '10px 15px',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    transition: 'background-color 0.3s ease',
-};
-
-const googleButtonHoverStyles = {
-    backgroundColor: '#357ae8', // Darker Google blue
-};
-
-function SignIn({ onLoginSuccess }) {
-const [buttonStyle, setButtonStyle] = useState(googleButtonStyles);
-  
-  const handleSignIn = () => {
-    const googleUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
-    const scope = 'email profile';
-    const responseType = 'token';
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    const redirectUrl = 'http://localhost:5173/oauth2callback'; //Ensure correct redirect URL
-
-    const fullUrl = `${googleUrl}?scope=${scope}&response_type=${responseType}&client_id=${clientId}&redirect_uri=${redirectUrl}`;
-
-    window.location = fullUrl;
+function SignIn() {
+  const handleGoogleLogin = () => {
+    window.location.href = 'http://localhost:5000/google_login';
   };
 
-    useEffect(() => {
-        const handleCallback = async () => {
-        const hash = window.location.hash;
-        if(hash) {
-          const accessToken = hash.substring(hash.indexOf('=') + 1, hash.indexOf('&'));
-          
-          try {
-            const response = await axios.post('http://localhost:8000/api/login', { token: accessToken });
-            if(response.status === 200) {
-              onLoginSuccess(response.data);
-              window.location.hash = '';
-            }
-          } catch (error) {
-              console.error("Failed to login with Google token", error)
-              window.location.hash = '';
-          }
-        }
-        };
-  
-        handleCallback();
-      }, [onLoginSuccess])
-
-  const handleMouseEnter = () => {
-      setButtonStyle({ ...googleButtonStyles, ...googleButtonHoverStyles });
-  };
-
-  const handleMouseLeave = () => {
-      setButtonStyle(googleButtonStyles);
-  };
-
-    return (
-      <div className="bg-white p-8 rounded shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Sign In</h2>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900">Welcome</h2>
+          <p className="mt-2 text-sm text-gray-600">Please sign in to continue</p>
+        </div>
         <button
-          style={buttonStyle}
-          onClick={handleSignIn}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          onClick={handleGoogleLogin}
+          className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          Sign In with Google
+          Sign in with Google
         </button>
       </div>
-    );
+    </div>
+  );
 }
 
 export default SignIn;

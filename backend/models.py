@@ -1,12 +1,12 @@
-from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from app import db
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50))
-    last_name = db.Column(db.String(50))
-    email = db.Column(db.String(100), unique=True)
-    google_id = db.Column(db.String(255), unique=True, nullable=True)
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
+    email = db.Column(db.String(120), unique=True)
+    google_id = db.Column(db.String(100), unique=True)
 
     def __init__(self, first_name, last_name, email, google_id=None):
         self.first_name = first_name
