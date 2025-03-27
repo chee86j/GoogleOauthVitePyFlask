@@ -1,69 +1,70 @@
-from flask import redirect, url_for, session, jsonify
+from flask import redirect, url_for, session, jsonify, Blueprint, request
 from flask_dance.contrib.google import google
 from flask_login import login_user, current_user
-from app import app, db
-from models import User
+from .models import User
+from .extensions import db
 import os
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from datetime import timedelta
 
-@app.route('/google_login')
-def google_login():
-    if not google.authorized:
-        return redirect(url_for("google.login"))
-    return redirect(url_for("google_authorized"))
+auth_routes = Blueprint('auth_routes', __name__)
 
-@app.route('/google_authorized')
-def google_authorized():
-    if not google.authorized:
-        return redirect(url_for('google_login'))
-    
+@auth_routes.route('/auth/google', methods=['POST'])
+def google_auth():
     try:
-        # Fetch user information from Google
-        resp = google.get("/oauth2/v1/userinfo")
-        if not resp.ok:
-            return jsonify({'error': 'Failed to fetch user info from Google.'}), 400
+        data = request.json
+        if not data or 'credential' not in data or 'userInfo' not in data:
+            return jsonify({'error': 'Missing required data'}), 400
 
-        user_info = resp.json()
-        email = user_info["email"]
-        first_name = user_info.get("given_name", "")
-        last_name = user_info.get("family_name", "")
-        google_id = user_info["id"]
+        # Extract user info from the response
+        email = data['userInfo'].get('email')
+        first_name = data['userInfo'].get('given_name', '')
+        last_name = data['userInfo'].get('family_name', '')
 
-        # Check if the user already exists
-        user = User.query.filter_by(google_id=google_id).first()
+        if not email:
+            return jsonify({'error': 'Email not found in user info'}), 400
+
+        # Check if user exists
+        user = User.query.filter_by(email=email).first()
 
         if not user:
-            # Create a new user if not found
+            # Create new user if doesn't exist
             user = User(
                 email=email,
                 first_name=first_name,
-                last_name=last_name,
-                google_id=google_id
+                last_name=last_name
             )
             db.session.add(user)
             db.session.commit()
 
-        # Log the user in
-        login_user(user)
-        session['user'] = {
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name
-        }
-        session.modified = True
+        # Create access token
+        access_token = create_access_token(
+            identity=email,
+            expires_delta=timedelta(days=1)
+        )
 
-        return redirect(f"{os.getenv('FRONTEND_URL')}?login=success")
+        return jsonify({
+            'access_token': access_token,
+            'user': user.to_dict()
+        }), 200
 
     except Exception as e:
+        print(f"Unexpected error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/check-auth')
-def check_auth():
-    if 'user' in session:
-        return jsonify(session['user'])
-    return jsonify({'error': 'Not authenticated'}), 401
-
-@app.route('/api/logout', methods=['POST'])
-def logout():
-    # Clear the session
-    session.clear()
-    return jsonify({'message': 'Successfully logged out'}), 200
+@auth_routes.route('/auth/verify', methods=['GET'])
+@jwt_required()
+def verify_token():
+    try:
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        return jsonify({
+            'user': user.to_dict()
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

@@ -1,169 +1,150 @@
-
 # GoogleOauthVitePyFlask
 
-A full-stack web application integrating Google OAuth 2.0 for user authentication. The project uses a **Vite-powered React frontend** and a **Flask backend**.
+A modern full-stack web application demonstrating Google OAuth 2.0 integration using React (Vite) and Flask. This project showcases secure user authentication, protected routes, and a clean, modern UI built with Tailwind CSS.
 
----
+## Project Structure
 
-## Features
+```
+├── backend/
+│   ├── __init__.py          # Flask app initialization
+│   ├── app.py               # Main application entry point
+│   ├── config.py            # Configuration settings
+│   ├── extensions.py        # Flask extensions initialization
+│   ├── google_oauth.py      # Google OAuth implementation
+│   ├── models.py            # Database models
+│   ├── routes.py            # API endpoints
+│   ├── seed.py             # Database seeding script
+│   └── requirements.txt     # Python dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   ├── context/       # React context providers
+│   │   ├── App.jsx        # Main React component
+│   │   ├── Home.jsx       # Home page component
+│   │   └── main.jsx       # React entry point
+│   ├── package.json       # JavaScript dependencies
+│   └── tailwind.config.js # Tailwind CSS configuration
+└── .env                   # Environment variables
+```
 
-- Secure Google OAuth 2.0 authentication.
-- Protected routes and session management.
-- PostgreSQL database integration.
-- React frontend styled with Tailwind CSS.
+## Tech Stack
 
----
+### Backend (Flask)
+- **Flask 3.0.2**: Modern Python web framework
+- **Flask-SQLAlchemy 3.1.1**: SQL ORM for Python
+- **Flask-Migrate 4.0.7**: Database migration handling
+- **Flask-JWT-Extended 4.6.0**: JWT authentication
+- **Flask-CORS 4.0.0**: Cross-Origin Resource Sharing
+- **PostgreSQL**: Database (via psycopg2-binary 2.9.9)
 
-## Backend Setup
+### Frontend (React + Vite)
+- **React 18.2.0**: UI library
+- **Vite 5.1.6**: Build tool and dev server
+- **@react-oauth/google 0.12.1**: Google OAuth integration
+- **React Router 6.22.3**: Client-side routing
+- **Tailwind CSS 3.4.1**: Utility-first CSS framework
 
-1. **Create a Python Virtual Environment**
+## Getting Started
+
+### Prerequisites
+- Python 3.x
+- Node.js and npm
+- PostgreSQL database
+- Google Cloud Console account
+
+### Backend Setup
+
+1. Create and activate virtual environment:
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows, use venv\Scripts\activate
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-2. **Install Dependencies**
+2. Install dependencies:
    ```bash
-   pip install -r backend/requirements.txt
+   cd backend
+   pip install -r requirements.txt
    ```
 
-3. **Set up the Database**
-   - Update the `.env` file with your PostgreSQL credentials.
-   - Initialize the database:
-     ```bash
-     flask db init
-     flask db migrate
-     flask db upgrade
-     ```
+3. Configure environment variables:
+   Create `.env` in the backend directory with:
+   ```
+   FLASK_APP=app.py
+   FLASK_ENV=development
+   DATABASE_URL=postgresql://username:password@localhost/dbname
+   GOOGLE_CLIENT_ID=your_client_id
+   GOOGLE_CLIENT_SECRET=your_client_secret
+   JWT_SECRET_KEY=your_jwt_secret
+   ```
 
-4. **Run the Flask Server**
+4. Initialize database:
    ```bash
-   python backend/app.py
+   flask db upgrade
+   python seed.py  # Optional: seed initial data
    ```
 
----
+5. Run the server:
+   ```bash
+   flask run
+   ```
 
-## Frontend Setup
+### Frontend Setup
 
-1. **Navigate to the Frontend Directory**
+1. Install dependencies:
    ```bash
    cd frontend
-   ```
-
-2. **Install Dependencies**
-   ```bash
    npm install
    ```
 
-3. **Start the Development Server**
+2. Configure environment variables:
+   Create `.env` in the frontend directory with:
+   ```
+   VITE_API_BASE_URL=http://localhost:5000
+   ```
+
+3. Start development server:
    ```bash
    npm run dev
    ```
 
----
+## Google OAuth Setup
 
-## Google OAuth 2.0 Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project or select existing one
+3. Enable Google Identity Services API
+4. Configure OAuth 2.0 credentials:
+   - Authorized JavaScript origins:
+     ```
+     http://localhost:5173
+     ```
+   - Authorized redirect URIs:
+     ```
+     http://localhost:5000/login/google/authorized
+     ```
+5. Copy Client ID and Client Secret to your `.env` files
 
-To enable Google OAuth 2.0 in your application:
+## Development
 
-1. **Create a Project in Google Cloud Console**:
-   - Visit [Google Cloud Console](https://console.cloud.google.com).
-   - Log in and create a new project or select an existing one.
-
-2. **Enable the Google Identity Services API**:
-   - Navigate to **APIs & Services > Library**.
-   - Search for and enable the **Google Identity Services API**.
-
-3. **Configure OAuth 2.0 Credentials**:
-   - Go to **APIs & Services > Credentials**.
-   - Click **Create Credentials** and select **OAuth 2.0 Client ID**.
-   - Choose **External** as the application type.
-   - Configure the following:
-     - **Authorized JavaScript Origins**:
-       ```
-       http://localhost:5173
-       http://127.0.0.1:5173
-       ```
-     - **Authorized Redirect URIs**:
-       ```
-       http://localhost:5000/login/google/authorized
-       http://127.0.0.1:5000/login/google/authorized
-       ```
-
-4. **Save Credentials**:
-   - Note the **Client ID** and **Client Secret**. Update your `.env` files as shown below.
-
----
-
-## Environment Variables
-
-### Root `.env`:
-```plaintext
-DB_USERNAME=postgres
-DB_PASSWORD=your_password
-DB_NAME=google_oauth_app_db
-JWT_SECRET_KEY=your_secret_key
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:5000/login/google/authorized
-FRONTEND_URL=http://localhost:5173
-```
-
-### Frontend `.env`:
-```plaintext
-VITE_API_BASE_URL=http://localhost:5000
-```
-
----
-
-## Tech Stack
-
-### Backend:
-- **Flask**: Backend framework for Python.
-- **Flask-Dance**: Simplifies OAuth integrations.
-- **Flask-SQLAlchemy**: ORM for managing database interactions.
-- **PostgreSQL**: Database for storing user and session data.
-- **Flask-Migrate**: Handles database migrations.
-- **Flask-Login**: Provides session management.
-
-### Frontend:
-- **React**: For building interactive user interfaces.
-- **React Router**: Enables client-side routing.
-- **Axios**: Handles API requests between the frontend and backend.
-- **Tailwind CSS**: Provides utility-first CSS for styling.
-- **Vite**: Development server and build tool for fast frontend development.
-
----
-
-## Common Issues
-
-1. **InsecureTransportError**
-   - Expected in development when running on HTTP.
-   - Use HTTPS in production.
-
-2. **Database Connection**
-   - Ensure PostgreSQL is running.
-   - Verify database credentials in `.env`.
-   - Confirm the database exists.
-
-3. **OAuth Errors**
-   - Check Google Cloud Console credentials.
-   - Verify redirect URIs.
-   - Ensure `.env` variables are correctly configured.
-
----
-
-## Development Details
-
-- **Backend**: Runs on `http://localhost:5000`.
-- **Frontend**: Runs on `http://localhost:5173`.
-- **CORS**: Configured to allow requests from the frontend origin.
-- **Database Migrations**: Managed using Flask-Migrate.
-
----
+- Backend API runs on `http://localhost:5000`
+- Frontend dev server runs on `http://localhost:5173`
+- API endpoints are CORS-enabled for frontend origin
+- JWT tokens are used for session management
 
 ## Security Notes
 
-- Use HTTPS in production for secure communication.
-- Never commit `.env` files to source control.
-- Keep Google Client ID and Client Secret private.
+- Store sensitive data in `.env` files (never commit to version control)
+- Use HTTPS in production
+- Keep Google OAuth credentials secure
+- Implement proper error handling and validation
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is open source and available under the MIT License.

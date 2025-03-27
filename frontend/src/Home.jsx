@@ -1,93 +1,82 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Toast from './components/Toast';
+import React from "react";
+import { useAuth } from "./context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const Home = ({ user, setUser }) => {
+const Home = () => {
   const navigate = useNavigate();
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState('success');
+  const { user, logout } = useAuth();
 
   const handleSignOut = async () => {
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/logout`,
-        {},
-        { withCredentials: true }
-      );
-      setUser(null);
-      navigate('/signin', { replace: true });
+      logout();
+      navigate("/login", { replace: true });
     } catch (error) {
-      console.error('Logout failed:', error);
-      setToastMessage('Failed to log out. Please try again.');
-      setToastType('error');
-      setShowToast(true);
+      console.error("Logout failed:", error);
     }
   };
 
   if (!user) {
-    navigate('/signin');
+    navigate("/login");
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
-      {/* Navigation Bar */}
-      <nav className="bg-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-xl font-semibold text-gray-800">
-                Welcome, {user.first_name}!
+    <div className="min-h-screen bg-white">
+      {/* Mobile-first navigation */}
+      <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex-shrink-0">
+              <span className="text-gray-900 text-lg font-medium">
+                Your Company Name Here
               </span>
             </div>
-            <div className="flex items-center">
-              <button
-                onClick={handleSignOut}
-                className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md shadow-md transition-colors"
-              >
-                Sign Out
-              </button>
-            </div>
+            <button
+              onClick={handleSignOut}
+              className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            >
+              Sign Out
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-xl p-6">
-          <h2 className="text-2xl font-bold mb-4">Your Profile</h2>
-          <div className="space-y-4">
-            <p className="text-gray-700">
-              <span className="font-semibold">Name:</span> {user.first_name} {user.last_name}
-            </p>
-            <p className="text-gray-700">
-              <span className="font-semibold">Email:</span> {user.email}
+      {/* Main content */}
+      <main className="pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Welcome section */}
+          <div className="mt-8 sm:mt-12 text-center">
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">
+              Welcome, {user.first_name}!
+            </h1>
+            <p className="mt-4 text-xl text-gray-600">
+              We're glad to have you here
             </p>
           </div>
-        </div>
-      </div>
 
-      {showToast && (
-        <Toast
-          message={toastMessage}
-          type={toastType}
-          onClose={() => setShowToast(false)}
-        />
-      )}
+          {/* User info card */}
+          <div className="mt-8 sm:mt-12 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div className="text-sm font-medium text-gray-500">
+                    Full Name
+                  </div>
+                  <div className="text-base text-gray-900">
+                    {user.first_name} {user.last_name}
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div className="text-sm font-medium text-gray-500">Email</div>
+                  <div className="text-base text-gray-900">{user.email}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
-};
-
-Home.propTypes = {
-  user: PropTypes.shape({
-    first_name: PropTypes.string,
-    last_name: PropTypes.string,
-    email: PropTypes.string
-  }),
-  setUser: PropTypes.func.isRequired
 };
 
 export default Home;

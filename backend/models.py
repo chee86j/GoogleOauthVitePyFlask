@@ -1,18 +1,20 @@
-from flask_login import UserMixin
-from app import db
+from .extensions import db
+from datetime import datetime
 
-class User(UserMixin, db.Model):
+class User(db.Model):
+    __tablename__ = 'users'
+    
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(100))
-    last_name = db.Column(db.String(100))
-    email = db.Column(db.String(120), unique=True)
-    google_id = db.Column(db.String(100), unique=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    first_name = db.Column(db.String(80))
+    last_name = db.Column(db.String(80))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def __init__(self, first_name, last_name, email, google_id=None):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.google_id = google_id
-
-    def __repr__(self):
-        return f"<User {self.first_name} {self.last_name}>"
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name
+        }
