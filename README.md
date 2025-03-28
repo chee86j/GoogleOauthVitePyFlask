@@ -30,6 +30,7 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
 ## Tech Stack
 
 ### Backend (Flask)
+
 - **Flask 3.0.2**: Modern Python web framework
 - **Flask-SQLAlchemy 3.1.1**: SQL ORM for Python
 - **Flask-Migrate 4.0.7**: Database migration handling
@@ -38,6 +39,7 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
 - **PostgreSQL**: Database (via psycopg2-binary 2.9.9)
 
 ### Frontend (React + Vite)
+
 - **React 18.2.0**: UI library
 - **Vite 5.1.6**: Build tool and dev server
 - **@react-oauth/google 0.12.1**: Google OAuth integration
@@ -47,6 +49,7 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
 ## Getting Started
 
 ### Prerequisites
+
 - Python 3.x
 - Node.js and npm
 - PostgreSQL database
@@ -55,12 +58,14 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
 ### Backend Setup
 
 1. Create and activate virtual environment:
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 2. Install dependencies:
+
    ```bash
    cd backend
    pip install -r requirements.txt
@@ -68,6 +73,7 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
 
 3. Configure environment variables:
    Create `.env` in the backend directory with:
+
    ```
    FLASK_APP=app.py
    FLASK_ENV=development
@@ -78,6 +84,7 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
    ```
 
 4. Initialize database:
+
    ```bash
    flask db upgrade
    python seed.py  # Optional: seed initial data
@@ -91,6 +98,7 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
 ### Frontend Setup
 
 1. Install dependencies:
+
    ```bash
    cd frontend
    npm install
@@ -98,6 +106,7 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
 
 2. Configure environment variables:
    Create `.env` in the frontend directory with:
+
    ```
    VITE_API_BASE_URL=http://localhost:5000
    ```
@@ -129,6 +138,14 @@ A modern full-stack web application demonstrating Google OAuth 2.0 integration u
 - Frontend dev server runs on `http://localhost:5173`
 - API endpoints are CORS-enabled for frontend origin
 - JWT tokens are used for session management
+
+### Avatar Handling
+
+- User avatars come from Google profile pictures
+- Images are stored as base64 in the database
+- Max image size: 512px (auto-resized)
+- JPEG format with 85% quality
+- Fallback: User's first initial in a gray circle
 
 ## Security Notes
 

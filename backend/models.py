@@ -8,6 +8,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     first_name = db.Column(db.String(80))
     last_name = db.Column(db.String(80))
+    avatar = db.Column(db.Text, nullable=True)  # Store avatar as base64 string
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -16,5 +17,6 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'first_name': self.first_name,
-            'last_name': self.last_name
+            'last_name': self.last_name,
+            'avatar': self.avatar
         }

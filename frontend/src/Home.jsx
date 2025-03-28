@@ -31,12 +31,29 @@ const Home = () => {
                 Your Company Name Here
               </span>
             </div>
-            <button
-              onClick={handleSignOut}
-              className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-            >
-              Sign Out
-            </button>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={`${user.first_name}'s avatar`}
+                    className="h-8 w-8 rounded-full object-cover ring-2 ring-white"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-600 text-sm font-medium">
+                      {user.first_name?.[0]?.toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -46,6 +63,21 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           {/* Welcome section */}
           <div className="mt-8 sm:mt-12 text-center">
+            <div className="flex justify-center mb-6">
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={`${user.first_name}'s avatar`}
+                  className="h-24 w-24 rounded-full object-cover ring-4 ring-white shadow-lg"
+                />
+              ) : (
+                <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center ring-4 ring-white shadow-lg">
+                  <span className="text-gray-600 text-3xl font-medium">
+                    {user.first_name?.[0]?.toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </div>
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">
               Welcome, {user.first_name}!
             </h1>

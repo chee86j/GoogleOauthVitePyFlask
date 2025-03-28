@@ -9,6 +9,46 @@ const AuthForm = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const convertImageToBase64 = async (
+    imageUrl,
+    retries = 3,
+    backoff = 1000
+  ) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(imageUrl);
+        if (response.status === 429) {
+          // Rate limit hit
+          console.log(
+            `Rate limit hit, waiting ${backoff}ms before retry ${
+              i + 1
+            }/${retries}`
+          );
+          await delay(backoff);
+          backoff *= 2; // Exponential backoff
+          continue;
+        }
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (error) {
+        console.error(`Attempt ${i + 1}/${retries} failed:`, error);
+        if (i === retries - 1) return null; // Return null after all retries failed
+        await delay(backoff);
+        backoff *= 2; // Exponential backoff
+      }
+    }
+    return null;
+  };
+
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
       try {
